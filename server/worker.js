@@ -18,12 +18,12 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Verify connection
+
 transporter.verify((error) => {
   if (error) {
-    console.log("❌ SMTP Connection Error:", error);
+    console.log("SMTP Connection Error:", error);
   } else {
-    console.log("✅ SendGrid is ready (Running on @gmail.com mode)");
+    console.log("SendGrid is ready (Running on @gmail.com mode)");
   }
 });
 
@@ -33,12 +33,11 @@ const worker = new Worker(
     const { email, name } = job.data;
     const recipientName = name || "Hiring Manager";
 
-    console.log(`🚀 Processing: ${email}`);
+    console.log(`Processing: ${email}`);
 
     await transporter.sendMail({
       from: `"Abhigyan Sengupta" <${process.env.EMAIL_FROM}>`,
       to: email,
-      // Strategy: Matching Reply-To increases trust scores slightly
       replyTo: process.env.EMAIL_FROM,
       subject: `Inquiry: Full Stack Developer Role | Portfolio of Abhigyan Sengupta (Attn: ${recipientName})`,
 
@@ -74,17 +73,14 @@ LinkedIn: https://www.linkedin.com/in/abhigyan-sengupta-7925ab1b7
           <p style="margin: 0;"><a href="https://www.linkedin.com/in/abhigyan-sengupta-7925ab1b7" style="color: #0077b5; text-decoration: none;">LinkedIn Profile</a></p>
         </div>
       `,
-      // Adding Unsubscribe headers is standard practice for legitimate senders
       headers: {
         "List-Unsubscribe": `<mailto:${process.env.EMAIL_FROM}?subject=unsubscribe>`,
-        "X-Entity-Ref-ID": job.id, // Helps group the message correctly in some clients
+        "X-Entity-Ref-ID": job.id, 
       },
     });
   },
   {
     connection,
-    // CRITICAL: Without a domain, you MUST send slowly.
-    // Sending 1 email every 60 seconds mimics human behavior and prevents instant blocking.
     limiter: {
       max: 1,
       duration: 60000,
@@ -92,7 +88,7 @@ LinkedIn: https://www.linkedin.com/in/abhigyan-sengupta-7925ab1b7
   }
 );
 
-worker.on("completed", (job) => console.log(`✅ Success: ${job.data.email}`));
+worker.on("completed", (job) => console.log(`Success: ${job.data.email}`));
 worker.on("failed", (job, err) =>
-  console.error(`❌ Failed ${job.data.email}: ${err.message}`)
+  console.error(`Failed ${job.data.email}: ${err.message}`)
 );
